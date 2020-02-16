@@ -42,11 +42,11 @@ function init() {
 function create() {
 
     this.anims.create({
-        key: 'agauche',
+        key: 'walk',
         frames: this.anims.generateFrameNames('pigeon',{
                 prefix: 'body_',
                 start: 0,
-                end: 14,
+                end: 16,
                 zeroPad: 1
             }),
         repeat: 0
@@ -74,17 +74,17 @@ function update() {
     // mid-anim move
     if (this.move != 0) {
         // move to follow belly
-        if (this.p.anims.getProgress()*10 > 4) this.p.x+=this.move;
+        if (this.p.anims.getProgress()*10 > 6) this.p.x+=this.move;
     }
     
     // turning
     if (this.cursors.left.isDown) {
-        this.p.play('agauche', true);
+        this.p.play('walk', true);
         this.p.scaleX = 1;
         this.move = -1*this.step;
 
     } else if (this.cursors.right.isDown) {
-        this.p.play('agauche', true);
+        this.p.play('walk', true);
         this.p.scaleX = -1;
         this.move = this.step
     } else {
