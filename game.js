@@ -27,6 +27,7 @@ function preload() {
 
     // pigeon
     this.load.atlas('pigeon', 'assets/spritesheet.png', 'assets/sprites.json');
+    this.load.image('gpp','assets/grospepere1200.png');
 }
 
 function init() {
@@ -48,7 +49,9 @@ function create() {
             }),
         repeat: -1
     }));
-    this.p = this.add.sprite(400,400,'pigeon');
+    // bg
+    this.add.sprite(0,0,'gpp').setDepth(1).setOrigin(0,0);
+    this.p = this.add.sprite(400,400,'pigeon').setDepth(5);
     //this.p.msPerFrame = 125;
     this.p.play('agauche');
 
