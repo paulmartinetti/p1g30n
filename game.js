@@ -36,6 +36,7 @@ function init() {
 
     this.cursors;
     this.step = 2;
+    this.move = 0;
 }
 
 function create() {
@@ -45,15 +46,16 @@ function create() {
         frames: this.anims.generateFrameNames('pigeon',{
                 prefix: 'body_',
                 start: 0,
-                end: 22,
+                end: 14,
                 zeroPad: 1
             }),
         repeat: 0
     });
     // bg
     this.add.sprite(0,0,'gpp').setDepth(1).setOrigin(0,0);
+    // pigeon
     this.p = this.add.sprite(400,400,'pigeon').setDepth(5);
-    //this.p.msPerFrame = 125;
+    
     
 
 
@@ -62,25 +64,30 @@ function create() {
     //let wall = this.matter.add.sprite(0, 1100, 'wall');
 
     this.cursors = this.input.keyboard.createCursorKeys();
+
+    
 }
 
 function update() {
-    /* if (this.cursors.up.isDown) {
 
-    } else {
-        //
-    } */
+
+    // mid-anim move
+    if (this.move != 0) {
+        // move to follow belly
+        if (this.p.anims.getProgress()*10 > 4) this.p.x+=this.move;
+    }
+    
     // turning
     if (this.cursors.left.isDown) {
         this.p.play('agauche', true);
         this.p.scaleX = 1;
-        this.p.x-=this.step;
+        this.move = -1*this.step;
 
     } else if (this.cursors.right.isDown) {
         this.p.play('agauche', true);
         this.p.scaleX = -1;
-        this.p.x+=this.step;
+        this.move = this.step
     } else {
-        //this.anims.stop(null, true);
+        this.move = 0;
     }
 }
