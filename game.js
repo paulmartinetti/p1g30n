@@ -14,6 +14,9 @@ var config = {
         create: create,
         update: update
     },
+    audio: {
+        disableWebAudio: true
+    },
     title: 'p1g30n',
     pixelArt: false,
     backgroundColor: '555555'
@@ -26,8 +29,14 @@ var game = new Phaser.Game(config);
 function preload() {
 
     // pigeon
-    this.load.atlas('pigeon', 'assets/spritesheet.png', 'assets/sprites.json');
-    this.load.image('gpp','assets/grospepere1200.png');
+    this.load.atlas('pigeon', 'assets/images/spritesheet.png', 'assets/images/sprites.json');
+    this.load.image('gpp', 'assets/images/grospepere1200.png');
+
+    // audio
+    this.load.audio('jack', 'assets/audio/Jackhammer-sound.mp3');
+    this.load.audio('gp1', 'assets/audio/Grospepere1.mp3');
+    this.load.audio('gp2', 'assets/audio/Grospepere2.mp3');
+
 }
 
 function init() {
@@ -42,41 +51,46 @@ function init() {
 function create() {
 
     // bg
-    this.add.sprite(0,0,'gpp').setDepth(1).setOrigin(0,0);
+    this.add.sprite(0, 0, 'gpp').setDepth(1).setOrigin(0, 0);
     // pigeon
-    this.p = this.add.sprite(400,500,'pigeon').setDepth(5).setOrigin(0.5, 1);
-    
+    this.p = this.add.sprite(400, 500, 'pigeon').setDepth(5).setOrigin(0.5, 1);
+
+    // audio - must be here in Scene create()
+    this.jackS = this.sound.add('jack');
+    this.gp1S = this.sound.add('gp1');
+    this.gp2S = this.sound.add('gp2');
+
     // walking
     this.anims.create({
         key: 'walk',
-        frames: this.anims.generateFrameNames('pigeon',{
-                prefix: 'body_',
-                start: 0,
-                end: 16,
-                zeroPad: 1
-            }),
+        frames: this.anims.generateFrameNames('pigeon', {
+            prefix: 'body_',
+            start: 0,
+            end: 16,
+            zeroPad: 1
+        }),
         repeat: 0
     });
     // eatF
     this.anims.create({
         key: 'eatF',
-        frames: this.anims.generateFrameNames('pigeon',{
-                prefix: 'body_',
-                start: 16,
-                end: 28,
-                zeroPad: 1
-            }),
+        frames: this.anims.generateFrameNames('pigeon', {
+            prefix: 'body_',
+            start: 16,
+            end: 28,
+            zeroPad: 1
+        }),
         repeat: 0
     });
     // eatB
     this.anims.create({
         key: 'eatB',
-        frames: this.anims.generateFrameNames('pigeon',{
-                prefix: 'body_',
-                start: 29,
-                end: 40,
-                zeroPad: 1
-            }),
+        frames: this.anims.generateFrameNames('pigeon', {
+            prefix: 'body_',
+            start: 29,
+            end: 40,
+            zeroPad: 1
+        }),
         repeat: 0
     });
 
@@ -87,7 +101,7 @@ function create() {
 
     this.cursors = this.input.keyboard.createCursorKeys();
 
-    
+
 }
 
 function update() {
@@ -96,28 +110,32 @@ function update() {
     // mid-anim move
     if (this.move != 0) {
         // move to follow belly
-        if (this.p.anims.getProgress()*10 > 6) this.p.x+=this.move;
+        if (this.p.anims.getProgress() * 10 > 6) this.p.x += this.move;
     }
-    
+
     // turning
     if (this.cursors.left.isDown) {
+        this.gp1S.play();
         this.p.play('walk', true);
         this.p.scaleX = 1;
-        this.move = -1*this.step;
+        this.move = -1 * this.step;
 
     } else if (this.cursors.right.isDown) {
+        this.gp2S.play();
         this.p.play('walk', true);
         this.p.scaleX = -1;
-        this.move = this.step
+        this.move = this.step;
     } else {
         this.move = 0;
     }
 
     // eating
     if (this.cursors.up.isDown) {
+        this.jackS.play();
         this.p.play('eatB', true);
-    } 
+    }
     if (this.cursors.down.isDown) {
+        this.jackS.play();
         this.p.play('eatF', true);
-    } 
+    }
 }
