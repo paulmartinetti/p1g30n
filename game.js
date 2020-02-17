@@ -44,18 +44,8 @@ function create() {
     // bg
     this.add.sprite(0,0,'gpp').setDepth(1).setOrigin(0,0);
     // pigeon
-    this.p = this.add.sprite(400,500,'pigeon').setDepth(5).setOrigin(0.625, 1);
-    // walking
-    this.anims.create({
-        key: 'eatF',
-        frames: this.anims.generateFrameNames('pigeon',{
-                prefix: 'body_',
-                start: 16,
-                end: 28,
-                zeroPad: 1
-            }),
-        repeat: 0
-    });
+    this.p = this.add.sprite(400,500,'pigeon').setDepth(5).setOrigin(0.5, 1);
+    
     // walking
     this.anims.create({
         key: 'walk',
@@ -67,7 +57,28 @@ function create() {
             }),
         repeat: 0
     });
-    
+    // eatF
+    this.anims.create({
+        key: 'eatF',
+        frames: this.anims.generateFrameNames('pigeon',{
+                prefix: 'body_',
+                start: 16,
+                end: 28,
+                zeroPad: 1
+            }),
+        repeat: 0
+    });
+    // eatB
+    this.anims.create({
+        key: 'eatB',
+        frames: this.anims.generateFrameNames('pigeon',{
+                prefix: 'body_',
+                start: 29,
+                end: 40,
+                zeroPad: 1
+            }),
+        repeat: 0
+    });
 
 
     // physics - matter
@@ -103,6 +114,9 @@ function update() {
     }
 
     // eating
+    if (this.cursors.up.isDown) {
+        this.p.play('eatB', true);
+    } 
     if (this.cursors.down.isDown) {
         this.p.play('eatF', true);
     } 
