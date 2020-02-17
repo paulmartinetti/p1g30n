@@ -41,6 +41,22 @@ function init() {
 
 function create() {
 
+    // bg
+    this.add.sprite(0,0,'gpp').setDepth(1).setOrigin(0,0);
+    // pigeon
+    this.p = this.add.sprite(400,500,'pigeon').setDepth(5).setOrigin(0.625, 1);
+    // walking
+    this.anims.create({
+        key: 'eatF',
+        frames: this.anims.generateFrameNames('pigeon',{
+                prefix: 'body_',
+                start: 16,
+                end: 28,
+                zeroPad: 1
+            }),
+        repeat: 0
+    });
+    // walking
     this.anims.create({
         key: 'walk',
         frames: this.anims.generateFrameNames('pigeon',{
@@ -51,11 +67,6 @@ function create() {
             }),
         repeat: 0
     });
-    // bg
-    this.add.sprite(0,0,'gpp').setDepth(1).setOrigin(0,0);
-    // pigeon
-    this.p = this.add.sprite(400,400,'pigeon').setDepth(5);
-    
     
 
 
@@ -90,4 +101,9 @@ function update() {
     } else {
         this.move = 0;
     }
+
+    // eating
+    if (this.cursors.down.isDown) {
+        this.p.play('eatF', true);
+    } 
 }
