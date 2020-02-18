@@ -50,8 +50,11 @@ function init() {
 
 function create() {
 
-    // bg
-    this.add.sprite(0, 0, 'gpp').setDepth(1).setOrigin(0, 0);
+    // background photo
+    this.bg = this.add.sprite(0, 0, 'gpp').setDepth(1).setOrigin(0, 0).setInteractive();
+    this.bg.on('pointerdown', function (pointer, localX, localY) {
+        console.log(pointer);
+    }, this);
     // pigeon
     this.p = this.add.sprite(400, 500, 'pigeon').setDepth(5).setOrigin(0.5, 1);
 
