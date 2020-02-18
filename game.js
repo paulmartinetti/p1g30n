@@ -30,7 +30,7 @@ function preload() {
 
     // pigeon
     this.load.atlas('pigeon', 'assets/images/spritesheet.png', 'assets/images/sprites.json');
-    this.load.image('gpp', 'assets/images/grospepere1200.png');
+    this.load.image('gpp', 'assets/images/grospepere1200.jpg');
 
     // audio
     this.load.audio('jack', 'assets/audio/Jackhammer-sound.mp3');
@@ -82,6 +82,9 @@ function create() {
         }),
         repeat: 0
     });
+    this.p.on('animationupdate-eatF', function (){
+        this.jackS.play();
+    },this);
     // eatB
     this.anims.create({
         key: 'eatB',
@@ -93,7 +96,9 @@ function create() {
         }),
         repeat: 0
     });
-
+    this.p.on('animationupdate-eatB', function (){
+        this.jackS.play();
+    },this);
 
     // physics - matter
     this.matter.world.setBounds(0, 0, 1200, 1200);
@@ -110,20 +115,20 @@ function update() {
     // mid-anim move
     if (this.move != 0) {
         // move to follow belly
-        if (this.p.anims.getProgress() * 10 > 6) this.p.x += this.move;
+        if (this.p.anims.getProgress() * 10 > 6) {
+            this.gp1S.play();
+            this.p.x += this.move;
+        }
     }
 
     // turning
     if (this.cursors.left.isDown) {
-        this.gp1S.play();
-        this.p.play('walk', true);
         this.p.scaleX = 1;
-        this.move = -1 * this.step;
-
-    } else if (this.cursors.right.isDown) {
-        this.gp2S.play();
         this.p.play('walk', true);
+        this.move = -1 * this.step;
+    } else if (this.cursors.right.isDown) {
         this.p.scaleX = -1;
+        this.p.play('walk', true);
         this.move = this.step;
     } else {
         this.move = 0;
@@ -131,11 +136,9 @@ function update() {
 
     // eating
     if (this.cursors.up.isDown) {
-        this.jackS.play();
         this.p.play('eatB', true);
     }
     if (this.cursors.down.isDown) {
-        this.jackS.play();
         this.p.play('eatF', true);
     }
 }
