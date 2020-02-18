@@ -28,9 +28,14 @@ var game = new Phaser.Game(config);
 
 function preload() {
 
+    // background photo
+    this.load.image('gpp', 'assets/images/grospepere1200.jpg');
+
     // pigeon
     this.load.atlas('pigeon', 'assets/images/spritesheet.png', 'assets/images/sprites.json');
-    this.load.image('gpp', 'assets/images/grospepere1200.jpg');
+
+    // bread
+    this.load.image('pain', 'assets/images/pain.png');
 
     // audio
     this.load.audio('jack', 'assets/audio/Jackhammer-sound.mp3');
@@ -46,17 +51,54 @@ function init() {
     this.cursors;
     this.step = 2;
     this.move = 0;
+
+    this.pconfig = {
+        minScale: 0.6,
+        maxScale: 1.6
+    };
+
+    this.painA = [];
+
+    /**
+     * Depths - bg = 1
+     *          br = 3 or 7
+     *          p = 5
+     */
 }
 
 function create() {
 
     // background photo
     this.bg = this.add.sprite(0, 0, 'gpp').setDepth(1).setOrigin(0, 0).setInteractive();
+
+    // pigeon - origin is bottom center, displayHeight = 232
+    // depth of 5
+    this.p = this.add.sprite(600, ((this.gameH/2)+(232/2)), 'pigeon').setDepth(5).setOrigin(0.5, 1);
+    //console.log(this.p);
+
+    /**
+     * User clicks on sidewalk, bread appears, pigeon walks over and eats it
+     */
+
+    // pigeon est libre pour chercher un bout de pain
+    this.dispo = true;
+    // il y en a (du pain - there is bread)
+    this.yena = false;
+    // listen for finger or mouse press on the sidewalk (y between 232 and 1196)
     this.bg.on('pointerdown', function (pointer, localX, localY) {
-        console.log(pointer);
+
+        // find pigeon
+        let px = this.p.x;
+        let py = this.p.y;
+
+        // put bread on ground
+        let br = this.add.sprite(pointer.downX, pointer.downY, 'pain');
+        // set level of bread, so if behind him, not on top
+        br.setDepth((py - pointer.downY) > 0 ? 3 : 7);
+        
+
     }, this);
-    // pigeon
-    this.p = this.add.sprite(400, 500, 'pigeon').setDepth(5).setOrigin(0.5, 1);
+
 
     // audio - must be here in Scene create()
     this.jackS = this.sound.add('jack');
@@ -74,7 +116,8 @@ function create() {
         }),
         repeat: 0
     });
-    // eatF
+
+    // eatForwards
     this.anims.create({
         key: 'eatF',
         frames: this.anims.generateFrameNames('pigeon', {
@@ -85,10 +128,11 @@ function create() {
         }),
         repeat: 0
     });
-    this.p.on('animationupdate-eatF', function (){
+    this.p.on('animationupdate-eatF', function () {
         this.jackS.play();
-    },this);
-    // eatB
+    }, this);
+
+    // eatBackwards
     this.anims.create({
         key: 'eatB',
         frames: this.anims.generateFrameNames('pigeon', {
@@ -99,21 +143,16 @@ function create() {
         }),
         repeat: 0
     });
-    this.p.on('animationupdate-eatB', function (){
+    this.p.on('animationupdate-eatB', function () {
         this.jackS.play();
-    },this);
+    }, this);
 
-    // physics - matter
-    this.matter.world.setBounds(0, 0, 1200, 1200);
-    //let wall = this.matter.add.sprite(0, 1100, 'wall');
 
     this.cursors = this.input.keyboard.createCursorKeys();
-
 
 }
 
 function update() {
-
 
     // mid-anim move
     if (this.move != 0) {
