@@ -82,9 +82,6 @@ function create() {
         }),
         repeat: 0
     });
-    this.p.on('animationupdate-eatF', function (){
-        this.jackS.play();
-    },this);
     // eatB
     this.anims.create({
         key: 'eatB',
@@ -96,12 +93,17 @@ function create() {
         }),
         repeat: 0
     });
+
+    // sync sound jackS with pigeon
+    this.p.on('animationupdate-eatF', function (){
+        this.jackS.play();
+    },this);
     this.p.on('animationupdate-eatB', function (){
         this.jackS.play();
     },this);
 
     // physics - matter
-    this.matter.world.setBounds(0, 0, 1200, 1200);
+    //this.matter.world.setBounds(0, 0, 1200, 1200);
     //let wall = this.matter.add.sprite(0, 1100, 'wall');
 
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -110,8 +112,6 @@ function create() {
 }
 
 function update() {
-
-
     // mid-anim move
     if (this.move != 0) {
         // move to follow belly
