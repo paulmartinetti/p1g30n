@@ -57,12 +57,17 @@ function init() {
         maxScale: 1.6
     };
 
+    // to manage multiple breads
     this.painA = [];
+    this.ind = 0;
+
+    // pigeon movement
+    this.sens = 0;
 
     /**
-     * Depths - bg = 1
-     *          br = 3 or 7
-     *          p = 5
+     * Depths - background = 1
+     *          breads = 3 or 7
+     *          pigeon = 5
      */
 }
 
@@ -91,10 +96,21 @@ function create() {
         let px = this.p.x;
         let py = this.p.y;
 
-        // put bread on ground
+        // put bread on ground - display W=52, H=71
         let br = this.add.sprite(pointer.downX, pointer.downY, 'pain');
+
+        // determine where on the clock the bread is relative to the pigeon
+        let dxraw = px - pointer.downX;
+        let dyraw = py - pointer.downY;
+
+        // calculate one of four relative positions
+        
+
         // set level of bread, so if behind him, not on top
-        br.setDepth((py - pointer.downY) > 0 ? 3 : 7);
+        br.setDepth((dyraw) > 0 ? 3 : 7);
+        
+        // 
+
         
 
     }, this);
