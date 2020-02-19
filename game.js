@@ -66,6 +66,10 @@ function init() {
     this.moveX = 0;
     this.moveY = 0;
 
+    this.pH = function pH (ay) {
+        return ay-100;
+    }
+
     /**
      * Depths - background = 1
      *          breads = 3 or 7
@@ -98,7 +102,7 @@ function create() {
             zeroPad: 1
         }),
         repeat: 0
-    });
+    },this);
 
     // eatForwards
     this.anims.create({
@@ -109,11 +113,16 @@ function create() {
             end: 28,
             zeroPad: 1
         }),
-        repeat: 0
-    });
+        repeat: 0,
+    },this);
     // eating sound
     this.p.on('animationupdate-eatF', function () {
         this.jackS.play();
+    }, this);
+    // done eating
+    this.p.on('animationcomplete-eatF', function () {
+        this.nextB.x = -500;
+        this.etat = 0;
     }, this);
 
     // eatBackwards
@@ -125,12 +134,18 @@ function create() {
             end: 40,
             zeroPad: 1
         }),
-        repeat: 0
+        repeat: 0,
     });
     // eating sound
     this.p.on('animationupdate-eatB', function () {
         this.jackS.play();
     }, this);
+    // done eating
+    this.p.on('animationcomplete-eatB', function () {
+        this.nextB.x = -500;
+        this.etat = 0;
+    }, this);
+    //
 
 
     /**
@@ -177,6 +192,8 @@ function update() {
 
     // if bread available and pigeon not moving
     if (this.painA.length > 0 && this.etat == 0) {
+        // look for more bread
+        this.closestB = { x: this.gameW, y: this.gameH };
         // look for closest bread
         let yena = false;
         this.painA.forEach(pain => {
@@ -186,7 +203,7 @@ function update() {
                 yena = true;
                 // capture distance and direction to each bread
                 let dx = pain.bx - this.p.x;
-                let dy = pain.by - this.p.y;
+                let dy = pain.by - this.pH(this.p.y);
                 // this bread is closest, note it
                 if ((Math.abs(dx) + Math.abs(dy)) < (Math.abs(this.closestB.x) + Math.abs(this.closestB.y))) {
                     // includes direction
@@ -225,16 +242,16 @@ function update() {
         if (this.closestB.y < 0) {
             this.moveY = -1 * this.step;
             // adjust if arrived
-            if (this.p.y < this.nextB.y) this.moveY = 0;
+            if (this.pH(this.p.y) < this.nextB.y) this.moveY = 0;
         }  else {
             this.moveY = this.step;
             // adjust if arrived
-            if (this.p.y > this.nextB.y) this.moveY = 0;
+            if (this.pH(this.p.y) > this.nextB.y) this.moveY = 0;
         }
 
         // always move after belly
         if (this.p.anims.getProgress() * 10 > 6) {
-            //this.gp1S.play();
+            this.gp1S.play();
             this.p.x += this.moveX;
             this.p.y += this.moveY;
         }
@@ -249,15 +266,10 @@ function update() {
     if (this.etat == 2) {
         
         // if bread was above, eat behind
-        this.closestB.y < 0 ? this.p.play('eatB', true) : this.p.play('eatF', true);
+        this.pH(this.p.y) > this.nextB.y ? this.p.play('eatB', true) : this.p.play('eatF', true);
 
         // get rid of bread
         this.nextB.eaten = true;
-        this.nextB.x = -500;
-
-        // look for more bread
-        this.closestB = { x: this.gameW, y: this.gameH };
-        this.etat = 0;
 
     }
     
