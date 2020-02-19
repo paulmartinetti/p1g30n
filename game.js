@@ -58,6 +58,7 @@ function init() {
     // to manage multiple breads
     this.painA = [];
     this.closestB = { x: 1201, y: 1201 };
+    this.nextB;
 
     // pigeon movement
     this.step = 2;
@@ -136,10 +137,6 @@ function create() {
      * User clicks on sidewalk, bread appears, pigeon walks over and eats it
      */
 
-    // pigeon est libre pour chercher un bout de pain
-    this.dispo = true;
-    // il y en a (du pain - there is bread)
-    this.yena = false;
     // listen for finger or mouse press on the sidewalk (y between 232 and 1196)
     this.bg.on('pointerdown', function (pointer, localX, localY) {
 
@@ -175,23 +172,25 @@ function update() {
     // if bread available and pigeon not moving
     if (this.painA.length > 0 && this.etat == 0) {
         // look for closest bread
+        let yena = false;
         this.painA.forEach(pain => {
             // if not eaten, consider distance for closest (sum of x and y deltas)
             if (!pain.eaten) {
-                // there is at least one bread
-                this.etat = 1;
+                // there is bread
+                yena = true;
                 // capture distance and direction to each bread
                 let dx = pain.x - this.p.x;
                 let dy = pain.y - this.p.y;
                 // this bread is closest, note it
                 if ((Math.abs(dx) + Math.abs(dy)) < (Math.abs(this.closestB.x) + Math.abs(this.closestB.y))) {
+                    // includes direction
                     this.closestB = { x: dx, y: dy };
+                    this.nextB = pain;
                 }
+                
             }
         });
-    } else {
-        // wait for bread
-        this.etat = 0;
+        if (yena) this.etat = 1;
     }
 
     // set direction based on left / right or x movement
@@ -222,11 +221,10 @@ function update() {
             this.p.y += this.moveY;
         }
         // check for arrival at bread
-        let bRect = .getBounds();
-        let tRect = this.terre.getBounds();
-        if (!Phaser.Geom.Intersects.RectangleToRectangle(bRect, tRect)) {
-            balloon.state = 2;
-            balloon.setFrame(1);
+        let bRect = this.nextB.getBounds();
+        let pRect = this.p.getBounds();
+        if (!Phaser.Geom.Intersects.RectangleToRectangle(bRect, pRect)) {
+            this.etat = 2;
         }
     }
     //this.p.play('eatB', true);
