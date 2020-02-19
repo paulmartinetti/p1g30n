@@ -57,7 +57,7 @@ function init() {
 
     // to manage multiple breads
     this.painA = [];
-    this.closestB = { x: 1201, y: 1201 };
+    this.closestB = { x: this.gameW, y: this.gameH };
     this.nextB;
 
     // pigeon movement
@@ -140,6 +140,9 @@ function create() {
     // listen for finger or mouse press on the sidewalk (y between 232 and 1196)
     this.bg.on('pointerdown', function (pointer, localX, localY) {
 
+        // must be on the sidewalk
+        if (pointer.downY < 232) return;
+
         // put bread on ground - display W=52, H=71
         let br = this.add.sprite(pointer.downX, pointer.downY, 'pain').setDepth(3);
 
@@ -150,11 +153,14 @@ function create() {
         br.eaten = false;
 
         // store bread coordinates - center
-        br.x = pointer.downX;
-        br.y = pointer.downY;
+        br.bx = pointer.downX;
+        br.by = pointer.downY;
 
         // store 
-        painA.push(br);
+        this.painA.push(br);
+
+        // any new bread means reset in pigeon
+        this.etat = 0;
 
     }, this);
 
@@ -164,8 +170,8 @@ function update() {
 
     /**
      * pigeon etat
-     * 0 = not moving, not eating
-     * 1 = bread available, moving
+     * 0 = not moving, not eating, looking for food
+     * 1 = bread available, moving toward closest bread
      * 2 = eating
      */
 
@@ -179,56 +185,82 @@ function update() {
                 // there is bread
                 yena = true;
                 // capture distance and direction to each bread
-                let dx = pain.x - this.p.x;
-                let dy = pain.y - this.p.y;
+                let dx = pain.bx - this.p.x;
+                let dy = pain.by - this.p.y;
                 // this bread is closest, note it
                 if ((Math.abs(dx) + Math.abs(dy)) < (Math.abs(this.closestB.x) + Math.abs(this.closestB.y))) {
                     // includes direction
                     this.closestB = { x: dx, y: dy };
+                    // for collision detection
                     this.nextB = pain;
                 }
-                
+
             }
         });
         if (yena) this.etat = 1;
     }
 
     // set direction based on left / right or x movement
-    if (this.etat = 1) {
+    if (this.etat == 1) {
         // moving to follow belly until arrived
         this.p.play('walk', true);
         // move X
+        //console.log("closestBx: "+this.closestB.x +" this.nextB.bx: "+this.nextB.bx);
         if (this.closestB.x < 0) {
             // look left
             this.p.scaleX = 1;
+            // move left
             this.moveX = -1 * this.step;
-            // 
+            // adjust if arrived
+            if (this.p.x < this.nextB.x) this.moveX = 0;
         } else {
+            // look right
             this.p.scaleX = -1;
+            // move right
             this.moveX = this.step;
+             // adjust if arrived
+             if (this.p.x > this.nextB.x) this.moveX = 0;
         }
         // move y
-        if (this.closestB.x < 0) {
+        if (this.closestB.y < 0) {
             this.moveY = -1 * this.step;
-        } else {
+            // adjust if arrived
+            if (this.p.y < this.nextB.y) this.moveY = 0;
+        }  else {
             this.moveY = this.step;
+            // adjust if arrived
+            if (this.p.y > this.nextB.y) this.moveY = 0;
         }
+
         // always move after belly
         if (this.p.anims.getProgress() * 10 > 6) {
-            this.gp1S.play();
-            // when values are zero, he's just not moving
+            //this.gp1S.play();
             this.p.x += this.moveX;
             this.p.y += this.moveY;
         }
         // check for arrival at bread
         let bRect = this.nextB.getBounds();
         let pRect = this.p.getBounds();
-        if (!Phaser.Geom.Intersects.RectangleToRectangle(bRect, pRect)) {
+        if (Phaser.Geom.Intersects.RectangleToRectangle(bRect, pRect)) {
             this.etat = 2;
         }
     }
-    //this.p.play('eatB', true);
-    //this.p.play('eatF', true);
+    // pigeon is eating
+    if (this.etat == 2) {
+        
+        // if bread was above, eat behind
+        this.closestB.y < 0 ? this.p.play('eatB', true) : this.p.play('eatF', true);
+
+        // get rid of bread
+        this.nextB.eaten = true;
+        this.nextB.x = -500;
+
+        // look for more bread
+        this.closestB = { x: this.gameW, y: this.gameH };
+        this.etat = 0;
+
+    }
+    
 }
 
-    
+
