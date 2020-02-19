@@ -192,7 +192,7 @@ function update() {
 
     // if bread available and pigeon not moving
     if (this.painA.length > 0 && this.etat == 0) {
-        // bread is always closer than edges of game
+        // bread is always closer than edges of game, start looking
         this.closestB = { dx: this.gameW, dy: this.gameH };
         // look for closest bread
         let yena = false;
@@ -203,6 +203,7 @@ function update() {
                 yena = true;
                 // capture distance and direction to each bread
                 let dx = pain.bx - this.p.x;
+                // pH is pigeon head
                 let dy = pain.by - this.pH(this.p.y);
                 // this bread is closest, note it
                 if ((Math.abs(dx) + Math.abs(dy)) < (Math.abs(this.closestB.dx) + Math.abs(this.closestB.dy))) {
@@ -222,6 +223,7 @@ function update() {
     if (this.etat == 1) {
         // moving to follow belly until arrived
         this.p.play('walk', true);
+
         // move X
         if (this.closestB.dx < 0) {
             // look left
@@ -251,15 +253,20 @@ function update() {
 
         // always move after belly
         if (this.p.anims.getProgress() * 10 > 6) {
-            //this.gp1S.play();
+            this.gp1S.play();
             this.p.x += this.moveX;
             this.p.y += this.moveY;
         }
-        // check for arrival at bread
+
+        // check for arrival at bread, two rectangles intersect
         let bRect = this.nextB.getBounds();
         let pRect = this.p.getBounds();
         if (Phaser.Geom.Intersects.RectangleToRectangle(bRect, pRect)) {
-            this.etat = 2;
+            // allow pigeon to move closer for eating animation
+            let xDist = Math.abs(this.p.x - this.nextB.bx);
+            let yDist = Math.abs(this.p.y - this.nextB.by);
+            // okay to eat
+            if (xDist < 70 && yDist < 150) this.etat = 2;
         }
     }
     // pigeon is eating
