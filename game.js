@@ -48,9 +48,7 @@ function init() {
     this.gameW = this.sys.game.config.width;
     this.gameH = this.sys.game.config.height;
 
-    this.cursors;
-    this.step = 2;
-    this.move = 0;
+    //this.cursors;
 
     this.pconfig = {
         minScale: 0.6,
@@ -59,10 +57,13 @@ function init() {
 
     // to manage multiple breads
     this.painA = [];
-    this.ind = 0;
+    this.closestB = { x: 1201, y: 1201 };
 
     // pigeon movement
-    this.sens = 0;
+    this.step = 2;
+    this.etat = 0;
+    this.moveX = 0;
+    this.moveY = 0;
 
     /**
      * Depths - background = 1
@@ -76,45 +77,10 @@ function create() {
     // background photo
     this.bg = this.add.sprite(0, 0, 'gpp').setDepth(1).setOrigin(0, 0).setInteractive();
 
-    // pigeon - origin is bottom center, displayHeight = 232
+    // pigeon - origin is bottom center bc of animations, displayHeight = 232
     // depth of 5
-    this.p = this.add.sprite(600, ((this.gameH/2)+(232/2)), 'pigeon').setDepth(5).setOrigin(0.5, 1);
+    this.p = this.add.sprite(600, ((this.gameH / 2) + (232 / 2)), 'pigeon').setDepth(5).setOrigin(0.5, 1);
     //console.log(this.p);
-
-    /**
-     * User clicks on sidewalk, bread appears, pigeon walks over and eats it
-     */
-
-    // pigeon est libre pour chercher un bout de pain
-    this.dispo = true;
-    // il y en a (du pain - there is bread)
-    this.yena = false;
-    // listen for finger or mouse press on the sidewalk (y between 232 and 1196)
-    this.bg.on('pointerdown', function (pointer, localX, localY) {
-
-        // find pigeon
-        let px = this.p.x;
-        let py = this.p.y;
-
-        // put bread on ground - display W=52, H=71
-        let br = this.add.sprite(pointer.downX, pointer.downY, 'pain');
-
-        // determine where on the clock the bread is relative to the pigeon
-        let dxraw = px - pointer.downX;
-        let dyraw = py - pointer.downY;
-
-        // calculate one of four relative positions
-        
-
-        // set level of bread, so if behind him, not on top
-        br.setDepth((dyraw) > 0 ? 3 : 7);
-        
-        // 
-
-        
-
-    }, this);
-
 
     // audio - must be here in Scene create()
     this.jackS = this.sound.add('jack');
@@ -144,6 +110,7 @@ function create() {
         }),
         repeat: 0
     });
+    // eating sound
     this.p.on('animationupdate-eatF', function () {
         this.jackS.play();
     }, this);
@@ -159,44 +126,111 @@ function create() {
         }),
         repeat: 0
     });
+    // eating sound
     this.p.on('animationupdate-eatB', function () {
         this.jackS.play();
     }, this);
 
 
-    this.cursors = this.input.keyboard.createCursorKeys();
+    /**
+     * User clicks on sidewalk, bread appears, pigeon walks over and eats it
+     */
+
+    // pigeon est libre pour chercher un bout de pain
+    this.dispo = true;
+    // il y en a (du pain - there is bread)
+    this.yena = false;
+    // listen for finger or mouse press on the sidewalk (y between 232 and 1196)
+    this.bg.on('pointerdown', function (pointer, localX, localY) {
+
+        // put bread on ground - display W=52, H=71
+        let br = this.add.sprite(pointer.downX, pointer.downY, 'pain').setDepth(3);
+
+        // set level of bread, so if behind pigeon, not on top
+        //br.setDepth((br.y-this.p.y) < 0 ? 3 : 7);
+
+        // state of bread
+        br.eaten = false;
+
+        // store bread coordinates - center
+        br.x = pointer.downX;
+        br.y = pointer.downY;
+
+        // store 
+        painA.push(br);
+
+    }, this);
 
 }
 
 function update() {
 
-    // mid-anim move
-    if (this.move != 0) {
-        // move to follow belly
+    /**
+     * pigeon etat
+     * 0 = not moving, not eating
+     * 1 = bread available, moving
+     * 2 = eating
+     */
+
+    // if bread available and pigeon not moving
+    if (this.painA.length > 0 && this.etat == 0) {
+        // look for closest bread
+        this.painA.forEach(pain => {
+            // if not eaten, consider distance for closest (sum of x and y deltas)
+            if (!pain.eaten) {
+                // there is at least one bread
+                this.etat = 1;
+                // capture distance and direction to each bread
+                let dx = pain.x - this.p.x;
+                let dy = pain.y - this.p.y;
+                // this bread is closest, note it
+                if ((Math.abs(dx) + Math.abs(dy)) < (Math.abs(this.closestB.x) + Math.abs(this.closestB.y))) {
+                    this.closestB = { x: dx, y: dy };
+                }
+            }
+        });
+    } else {
+        // wait for bread
+        this.etat = 0;
+    }
+
+    // set direction based on left / right or x movement
+    if (this.etat = 1) {
+        // moving to follow belly until arrived
+        this.p.play('walk', true);
+        // move X
+        if (this.closestB.x < 0) {
+            // look left
+            this.p.scaleX = 1;
+            this.moveX = -1 * this.step;
+            // 
+        } else {
+            this.p.scaleX = -1;
+            this.moveX = this.step;
+        }
+        // move y
+        if (this.closestB.x < 0) {
+            this.moveY = -1 * this.step;
+        } else {
+            this.moveY = this.step;
+        }
+        // always move after belly
         if (this.p.anims.getProgress() * 10 > 6) {
             this.gp1S.play();
-            this.p.x += this.move;
+            // when values are zero, he's just not moving
+            this.p.x += this.moveX;
+            this.p.y += this.moveY;
+        }
+        // check for arrival at bread
+        let bRect = .getBounds();
+        let tRect = this.terre.getBounds();
+        if (!Phaser.Geom.Intersects.RectangleToRectangle(bRect, tRect)) {
+            balloon.state = 2;
+            balloon.setFrame(1);
         }
     }
-
-    // turning
-    if (this.cursors.left.isDown) {
-        this.p.scaleX = 1;
-        this.p.play('walk', true);
-        this.move = -1 * this.step;
-    } else if (this.cursors.right.isDown) {
-        this.p.scaleX = -1;
-        this.p.play('walk', true);
-        this.move = this.step;
-    } else {
-        this.move = 0;
-    }
-
-    // eating
-    if (this.cursors.up.isDown) {
-        this.p.play('eatB', true);
-    }
-    if (this.cursors.down.isDown) {
-        this.p.play('eatF', true);
-    }
+    //this.p.play('eatB', true);
+    //this.p.play('eatF', true);
 }
+
+    
