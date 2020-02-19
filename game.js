@@ -2,20 +2,11 @@ var config = {
     type: Phaser.AUTO,
     width: 1200,
     height: 1200,
-    physics: {
-        default: 'matter',
-        matter: {
-            debug: true
-        }
-    },
     scene: {
         preload: preload,
         init: init,
         create: create,
         update: update
-    },
-    audio: {
-        disableWebAudio: true
     },
     title: 'p1g30n',
     pixelArt: false,
@@ -40,7 +31,6 @@ function preload() {
     // audio
     this.load.audio('jack', 'assets/audio/Jackhammer-sound.mp3');
     this.load.audio('gp1', 'assets/audio/Grospepere1.mp3');
-    this.load.audio('gp2', 'assets/audio/Grospepere2.mp3');
 
 }
 
@@ -91,7 +81,6 @@ function create() {
     // audio - must be here in Scene create()
     this.jackS = this.sound.add('jack');
     this.gp1S = this.sound.add('gp1');
-    this.gp2S = this.sound.add('gp2');
 
     // walking
     this.anims.create({
