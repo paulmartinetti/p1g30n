@@ -77,11 +77,7 @@ function create() {
 
     // instructions
     let text = "Appuyez sur le sol pour nourrir le faux pigeon.\nIl n'est pas bête !"
-    this.instr = this.add.text(50, 260, text, { fontFamily: 'Arial, Helvetica, sans-serif' })
-        .setDepth(2)
-        .setFont('36px')
-        .setAlign('center')
-        .setColor('#000000');
+    this.instr = this.add.text(150, 260, text).setDepth(2).setFont('36px Arial').setAlign('center').setColor('#000000');
 
     // pigeon - origin is bottom center bc of animations, displayHeight = 232
     // depth of 5
@@ -118,14 +114,16 @@ function create() {
         }),
         repeat: 0,
     }, this);
-    // eating sound
+    // eating sound during animation
     this.p.on('animationupdate-eatF', function () {
         this.jackS.play();
     }, this);
 
     // done eating
     this.p.on('animationcomplete-eatF', function () {
+        // remove bread from stage
         this.nextB.x = -500;
+        // pursue any remaining bread
         this.etat = 0;
     }, this);
 
@@ -140,14 +138,16 @@ function create() {
         }),
         repeat: 0,
     });
-    // eating sound
+    // eating sound during animation
     this.p.on('animationupdate-eatB', function () {
         this.jackS.play();
     }, this);
 
     // done eating
     this.p.on('animationcomplete-eatB', function () {
+        // remove bread from stage
         this.nextB.x = -500;
+        // pursue any remaining bread
         this.etat = 0;
     }, this);
     //
@@ -190,7 +190,7 @@ function update() {
 
     /**
      * pigeon etat
-     * 0 = not moving, not eating, looking for food
+     * 0 = not moving, not eating, calculating closest bread
      * 1 = bread available, moving toward closest bread
      * 2 = eating
      */
@@ -283,7 +283,7 @@ function update() {
         // if bread was above, eat behind
         this.p.y > this.nextB.by ? this.p.play('eatB', true) : this.p.play('eatF', true);
 
-        // get rid of bread
+        // change bread state to eaten so it's no longer considered
         this.nextB.eaten = true;
 
     }
