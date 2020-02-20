@@ -58,9 +58,9 @@ function init() {
     this.moveY = 0;
 
     // move the y value of pigeon near visual center
-    this.pH = function pH (ay) {
+    this.pH = function pH(ay) {
         //return ay;
-        return ay-100;
+        return ay - 100;
     }
 
     /**
@@ -75,11 +75,19 @@ function create() {
     // background photo
     this.bg = this.add.sprite(0, 0, 'gpp').setDepth(1).setOrigin(0, 0).setInteractive();
 
+    // instructions
+    let text = "Appuyez sur le sol pour nourrir le faux pigeon.\nIl n'est pas bête !"
+    this.instr = this.add.text(50, 260, text, { fontFamily: 'Arial, Helvetica, sans-serif' })
+        .setDepth(2)
+        .setFont('36px')
+        .setAlign('center')
+        .setColor('#000000');
+
     // pigeon - origin is bottom center bc of animations, displayHeight = 232
     // depth of 5
     this.p = this.add.sprite(600, ((this.gameH / 2) + (232 / 2)), 'pigeon').setDepth(5).setOrigin(0.5, 1);
     // shadow underneath
-    this.om = this.add.sprite(585, ((this.gameH / 2) + (232 / 2)-5),'ombre').setDepth(2);
+    this.om = this.add.sprite(585, ((this.gameH / 2) + (232 / 2) - 5), 'ombre').setDepth(2);
     this.om.setScale(1.2);
     //console.log(this.p);
 
@@ -97,7 +105,7 @@ function create() {
             zeroPad: 1
         }),
         repeat: 0
-    },this);
+    }, this);
 
     // eatForwards
     this.anims.create({
@@ -109,7 +117,7 @@ function create() {
             zeroPad: 1
         }),
         repeat: 0,
-    },this);
+    }, this);
     // eating sound
     this.p.on('animationupdate-eatF', function () {
         this.jackS.play();
@@ -136,7 +144,7 @@ function create() {
     this.p.on('animationupdate-eatB', function () {
         this.jackS.play();
     }, this);
-    
+
     // done eating
     this.p.on('animationcomplete-eatB', function () {
         this.nextB.x = -500;
@@ -151,6 +159,9 @@ function create() {
 
     // listen for finger or mouse press on the sidewalk (y between 232 and 1196)
     this.bg.on('pointerdown', function (pointer, localX, localY) {
+
+        // remove instructions
+        this.instr.x = 1300;
 
         // must be on the sidewalk
         if (pointer.downY < 232) return;
@@ -231,15 +242,15 @@ function update() {
             this.p.scaleX = -1;
             // move right
             this.moveX = this.step;
-             // adjust if arrived
-             if (this.p.x > this.nextB.bx) this.moveX = 0;
+            // adjust if arrived
+            if (this.p.x > this.nextB.bx) this.moveX = 0;
         }
         // move y
         if (this.closestB.dy < 0) {
             this.moveY = -1 * this.step;
             // adjust if arrived
             if (this.pH(this.p.y) < this.nextB.by) this.moveY = 0;
-        }  else {
+        } else {
             this.moveY = this.step;
             // adjust if arrived
             if (this.pH(this.p.y) > this.nextB.by) this.moveY = 0;
@@ -268,7 +279,7 @@ function update() {
     }
     // pigeon is eating
     if (this.etat == 2) {
-        
+
         // if bread was above, eat behind
         this.p.y > this.nextB.by ? this.p.play('eatB', true) : this.p.play('eatF', true);
 
@@ -276,7 +287,7 @@ function update() {
         this.nextB.eaten = true;
 
     }
-    
+
 }
 
 
