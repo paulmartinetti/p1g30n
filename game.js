@@ -24,6 +24,7 @@ function preload() {
 
     // pigeon
     this.load.atlas('pigeon', 'assets/images/spritesheet.png', 'assets/images/sprites.json');
+    this.load.image('ombre', 'assets/images/ombre.png');
 
     // bread
     this.load.image('pain', 'assets/images/pain.png');
@@ -56,6 +57,7 @@ function init() {
     this.moveX = 0;
     this.moveY = 0;
 
+    // move the y value of pigeon near visual center
     this.pH = function pH (ay) {
         //return ay;
         return ay-100;
@@ -76,6 +78,9 @@ function create() {
     // pigeon - origin is bottom center bc of animations, displayHeight = 232
     // depth of 5
     this.p = this.add.sprite(600, ((this.gameH / 2) + (232 / 2)), 'pigeon').setDepth(5).setOrigin(0.5, 1);
+    // shadow underneath
+    this.om = this.add.sprite(585, ((this.gameH / 2) + (232 / 2)-5),'ombre').setDepth(2);
+    this.om.setScale(1.2);
     //console.log(this.p);
 
     // audio - must be here in Scene create()
@@ -245,6 +250,9 @@ function update() {
             this.gp1S.play();
             this.p.x += this.moveX;
             this.p.y += this.moveY;
+            // shadow
+            this.om.x += this.moveX;
+            this.om.y += this.moveY;
         }
 
         // check for arrival at bread, two rectangles intersect
@@ -262,7 +270,7 @@ function update() {
     if (this.etat == 2) {
         
         // if bread was above, eat behind
-        this.pH(this.p.y) > this.nextB.by ? this.p.play('eatB', true) : this.p.play('eatF', true);
+        this.p.y > this.nextB.by ? this.p.play('eatB', true) : this.p.play('eatF', true);
 
         // get rid of bread
         this.nextB.eaten = true;
